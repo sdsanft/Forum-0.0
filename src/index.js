@@ -14,14 +14,17 @@ class App extends React.Component {
     
         return (
             <div>
-                <h1>Hello, World</h1>
+                <h1>Raindrop Window</h1>
                 {this.state.canvasActive ? (
                     <div>
                         <Raindrop />
                         <button type='button' onClick={this.toggleCanvas}>Close</button>
                     </div>
                 ) : (
-                    <button type='button' onClick={this.toggleCanvas}>Raindrops!</button>
+                    <div>
+                        <p>Welcome to the rainy day simulator</p>
+                        <button type='button' onClick={this.toggleCanvas}>Open the window!</button>
+                    </div>
                 )}
             </div>
         )
