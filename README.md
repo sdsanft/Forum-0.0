@@ -8,4 +8,4 @@ A forum app that currently allows users to create and view threads and posts tha
 1. Download and install node.js and MongoDB
 2. ` git clone https://github.com/sdsanft/NodeTest-0.0.git `
 3. ` npm install `
-5. ` npm run start `
+4. ` npm run start `
