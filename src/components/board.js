@@ -5,7 +5,7 @@ class Board extends React.Component {
     constructor (props) {
         super(props)
 
-        this.state = {view: "/", newThread: false, threads: [], err: null}
+        this.state = {openThread: null, newThread: false, newPost: false, threads: [], err: null}
 
         axios.get('/api/threads').then(res => {
             this.setState({threads: res.data.threads})
@@ -33,8 +33,18 @@ class Board extends React.Component {
             var arr = []
             var threads = this.state.threads
 
-            threads.forEach(thread => {
-                arr.push(<p>{thread._id}, creator: {thread.creator}</p>)
+            threads.forEach((thread, i) => {
+                var time = new Date(thread.lastUpdate)
+                arr.push(
+                    <div>
+                        <a href="#" onClick={(e) => {
+                            e.preventDefault()
+                            this.setState({openThread: i, newThread: false, newPost: false, threadTitle: null, post: null})
+                        }}>{thread._id}</a>
+                        <p>Creator: {thread.creator}, Last update: {thread.mostRecent}, {time.toLocaleString()}</p>
+                    </div>
+                )
+                //arr.push(<p>{thread._id}, creator: {thread.creator}</p>)
             })
 
             return arr
@@ -50,7 +60,7 @@ class Board extends React.Component {
 
         var time = new Date()
         var thread = {
-            _id: this.state.threadTitle, time, creator: this.props.user, 
+            _id: this.state.threadTitle, time, creator: this.props.user, lastUpdate: time, mostRecent: this.props.user,
             posts: [{text: this.state.post, author: this.props.user, time}]
         }
         
@@ -62,7 +72,24 @@ class Board extends React.Component {
                     alert(JSON.stringify(res.data.err))
                 }
             } else {
-                this.setState({newThread: false})
+                this.setState({newThread: false, threadTitle: null, post: null})
+                this.updateThreads()
+            }
+        })
+    }
+
+    createNewPost = (event) => {
+        event.preventDefault()
+        
+        var time = new Date()
+        var post = {text: this.state.post, author: this.props.user, time}
+        var id = this.state.threads[this.state.openThread]._id
+
+        axios.post("/api/threads/" + id, {post}).then((res) => {
+            if (res.data.err) {
+                alert(JSON.stringify(err))
+            } else {
+                this.setState({newPost: false, post: null})
                 this.updateThreads()
             }
         })
@@ -71,12 +98,14 @@ class Board extends React.Component {
     render () {
         var threads = this.getThreads()
         var newThread
+        var openThread
 
         if(this.state.newThread) {
             var err
             if (this.state.err) {
                 err = <p>{this.state.err}</p>
             }
+
             newThread = (
                 <div>
                     <form onSubmit={this.createNewThread}>
@@ -87,11 +116,58 @@ class Board extends React.Component {
                         <textarea name="post" value={this.state.post} onChange={this.handleInputChange} /> <br />
                         <input type="submit" value="submit" />
                     </form>
-                    <button type="button" onClick={() => {this.setState({newThread: false})}}>Cancel</button>
+                    <button type="button" onClick={() => {this.setState({newThread: false, threadTitle: null, post: null})}}>Cancel</button>
                 </div>
             )
         } else {
             newThread = <button type="button" onClick={() => {this.setState({newThread: true})}}>Create new Thread</button>
+        }
+
+        if (this.state.openThread != null) {
+            openThread = []
+
+            var thread = this.state.threads[this.state.openThread]
+
+            openThread.push(
+                <h1>{thread._id}</h1>
+            )
+
+            thread.posts.forEach((post) => {
+                var time = new Date(post.time)
+                var post = (
+                    <div>
+                        <p style={{whiteSpace: "pre-line"}}>{post.text}</p>
+                        <p>{post.author}, {time.toLocaleString()}</p>
+                    </div>
+                )
+
+                openThread.push(post)
+            })
+
+            var newPost;
+
+            if (this.state.newPost) {
+                newPost = (
+                    <div>
+                        <form onSubmit={this.createNewPost}>
+                            Post <br />
+                            <textarea name="post" value={this.state.post} onChange={this.handleInputChange} /> <br />
+                            <input type="submit" value="submit" />
+                        </form>
+                        <button type="button" onClick={() => {this.setState({newPost: false, post: null})}}>Cancel</button>
+                    </div>
+                )
+            } else {
+                newPost = <button type="button" onClick={() => {this.setState({newPost: true})}}>New Post</button>
+            }
+
+            openThread.push(newPost)
+
+            openThread.push(
+                <button type="button" onClick={() => {this.setState({openThread: null, newPost: false, post:null})}}>Close Thread</button>
+            )
+        } else {
+            openThread = null
         }
 
         var page = (
@@ -102,6 +178,9 @@ class Board extends React.Component {
                 </div>
                 <div>
                     {newThread}
+                </div>
+                <div>
+                    {openThread}
                 </div>
             </div>
         )

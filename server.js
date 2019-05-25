@@ -20,6 +20,7 @@ app.listen(port, function(err) {
     if(err) {
         throw err;
     }
+    
     console.log("Listening at local port: " + port)
 })
 
@@ -29,7 +30,11 @@ app.get('/', function(req, res) {
 
 app.post('/api/login', function(req, res) {
     MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
-		if(err) {res.json(err); throw err;}
+		if(err) {
+            res.json(err);
+            throw err;
+        }
+        
         var db = client.db("FullStack")
         var users = db.collection("Users")
 		users.findOne({_id: req.body.user}, function(err, result) {
@@ -68,11 +73,15 @@ app.post('/api/createUser', function(req, res) {
 
 app.get('/api/threads', function(req, res) {
     MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
-        if (err) {res.json(err); throw err;}
+        if (err) {
+            res.json(err);
+            throw err;
+        }
+        
         var db = client.db("FullStack")
         var threads = db.collection("Threads")
 
-        cursor = threads.find()
+        cursor = threads.find().sort({lastUpdate: -1})
 
         var arr = [];
 
@@ -86,7 +95,11 @@ app.get('/api/threads', function(req, res) {
 
 app.post('/api/threads', function(req, res) {
     MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
-        if (err) {res.json(err); throw err;}
+        if (err) {
+            res.json(err);
+            throw err;
+        }
+        
         var db = client.db("FullStack")
         var threads = db.collection("Threads")
 
@@ -99,6 +112,35 @@ app.post('/api/threads', function(req, res) {
             } else{
                 res.end()
             }
+        })
+    })
+})
+
+app.post('/api/threads/:id', function(req, res) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
+        if (err) {
+            res.json(err); 
+            throw err;
+        }
+
+        var db = client.db("FullStack")
+        var threads = db.collection("Threads")
+
+        threads.findOne({_id: req.params.id}, (err, data) => {
+            if(err) {
+                res.json(err);
+                console.log(err);
+            }
+
+            var posts = data.posts;
+            posts.push(req.body.post)
+            var mostRecent = req.body.post.author;
+            var lastUpdate = req.body.post.time;
+
+            threads.updateOne({_id: data._id}, {$set: {posts, mostRecent, lastUpdate}}, (err) => {
+                if (err) console.log(err)
+                res.end()
+            })
         })
     })
 })
