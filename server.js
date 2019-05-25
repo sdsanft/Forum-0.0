@@ -27,7 +27,7 @@ app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/dist/index.html'))
 })
 
-app.post('/login', function(req, res) {
+app.post('/api/login', function(req, res) {
     MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
 		if(err) {res.json(err); throw err;}
         var db = client.db("FullStack")
@@ -48,7 +48,7 @@ app.post('/login', function(req, res) {
 	})
 })
 
-app.post('/createUser', function(req, res) {
+app.post('/api/createUser', function(req, res) {
     MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
         if (err) {res.json(err); throw err;}
         var db = client.db("FullStack")
@@ -61,6 +61,43 @@ app.post('/createUser', function(req, res) {
                 users.insertOne(user, function() {
                     res.json(user)
                 })
+            }
+        })
+    })
+})
+
+app.get('/api/threads', function(req, res) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
+        if (err) {res.json(err); throw err;}
+        var db = client.db("FullStack")
+        var threads = db.collection("Threads")
+
+        cursor = threads.find()
+
+        var arr = [];
+
+        cursor.forEach(doc => {
+            arr.push(doc)
+        }).then(() => {
+            res.json({threads: arr})
+        })
+    })
+})
+
+app.post('/api/threads', function(req, res) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
+        if (err) {res.json(err); throw err;}
+        var db = client.db("FullStack")
+        var threads = db.collection("Threads")
+
+        var newThread = req.body.thread;
+
+        threads.insertOne(newThread, (err) => {
+            if(err) {
+                console.log(err)
+                res.json({err})
+            } else{
+                res.end()
             }
         })
     })

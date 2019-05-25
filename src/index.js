@@ -2,8 +2,9 @@ const React = require('react')
 const ReactDOM = require('react-dom')
 const axios = require('axios')
 
-import Raindrop from "./components/raindropCanvas.js"
+//import Raindrop from "./components/raindropCanvas.js"
 import LoginForm from "./components/loginForm.js"
+import Board from "./components/board.js"
 
 class App extends React.Component {
     constructor (props) {
@@ -11,6 +12,7 @@ class App extends React.Component {
 
         this.state = {canvasActive: false, loginStatus: "", user: null, err: []}
         this.LoginInfo = React.createRef()
+        this.boardInfo = React.createRef()
 
         this.handleLogin = this.handleLogin.bind(this)
         this.handleCreate = this.handleCreate.bind(this)
@@ -25,7 +27,7 @@ class App extends React.Component {
         const form = this.LoginInfo.current
         this.setState({err: []})
 
-        axios.post("/login", {user: form.state.user, pw: form.state.pw}).then(res => {
+        axios.post("/api/login", {user: form.state.user, pw: form.state.pw}).then(res => {
             if (res.data.error) {
                 var err = this.state.err;
                 err.push(res.data.error);
@@ -40,7 +42,7 @@ class App extends React.Component {
         const form = this.LoginInfo.current
         this.setState({err: []})
 
-        axios.post("/createUser", {user: form.state.user, pw: form.state.pw}).then(res => {
+        axios.post("/api/createUser", {user: form.state.user, pw: form.state.pw}).then(res => {
             if (res.data.error) {
                 var err = this.state.err;
                 err.push(res.data.err)
@@ -58,26 +60,10 @@ class App extends React.Component {
     render() {
         const {count} = this.state
 
-        var divCanvas;
         var login;
         var userInfo;
         var errors;
-
-        if(this.state.canvasActive) {
-            divCanvas = (
-                <div>
-                    <Raindrop parent={this}/>
-                    <button type='button' onClick={this.toggleCanvas}>Close</button>
-                </div>
-            )
-        } else {
-            divCanvas = (
-                <div>
-                    <p>Welcome to the rainy day simulator</p>
-                    <button type='button' onClick={this.toggleCanvas}>Open the window!</button>
-                </div>
-            )
-        }
+        var board;
 
         if(this.state.loginStatus == "login") {
             login = (
@@ -109,8 +95,19 @@ class App extends React.Component {
                     <button type="button" onClick={() => {this.setState({loginStatus: "", user: null})}}>Log Out</button>
                 </div>
             )
+
+            board = (
+                <div>
+                    <Board user={this.state.user} ref={this.boardInfo}/>
+                </div>
+            )
         } else {
             userInfo = login
+            board = (
+                <div>
+                    <p>To access the board please login or create an account.</p>
+                </div>
+            )
         }
 
         var errors_comp = []
@@ -126,10 +123,10 @@ class App extends React.Component {
 
         var page = (
             <div>
-                <h1>Raindrop Window</h1>
-                {divCanvas}
+                <h1>Lotus Forum</h1>
                 {errors}
                 {userInfo}
+                {board}
             </div>
         )
     
