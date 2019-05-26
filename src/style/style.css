@@ -1,0 +1,45 @@
+* {
+    background: #333;
+    color: #FFF;
+}
+
+button {
+    border-color: #08A;
+    border-style: solid;
+    background: #FFC;
+    color: #333;
+    margin: 5px;
+}
+
+input[type=submit] {
+    border-color: #08A;
+    border-style: solid;
+    background: #FFC;
+    color: #333;
+    margin: 5px;
+}
+
+input[type=text] {
+    border-style: solid;
+    border-color: #777;
+    border-width: 1px;
+}
+
+input[type=password] {
+    border-style: solid;
+    border-color: #777;
+    border-width: 1px;
+}
+
+textarea {
+    border-style: solid;
+    border-color: #777;
+    border-width: 1px;
+    width: 80%;
+    resize: vertical;
+    max-width: 100%
+}
+
+[id="error"] {
+    color: #F00;
+}

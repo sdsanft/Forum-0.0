@@ -6,6 +6,8 @@ const axios = require('axios')
 import LoginForm from "./components/loginForm.js"
 import Board from "./components/board.js"
 
+import './style/style.css'
+
 class App extends React.Component {
     constructor (props) {
         super(props)
@@ -112,7 +114,7 @@ class App extends React.Component {
 
         var errors_comp = []
         this.state.err.forEach(function(error) {
-            errors_comp.push(<p>{error}</p>)
+            errors_comp.push(<p id="error">{error}</p>)
         })
 
         errors = (
